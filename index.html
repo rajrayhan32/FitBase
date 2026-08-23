@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FitBase — Gestão de academias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F4F2; --card:#FFFFFF; --ink:#16201D; --muted:#5C6763; --line:#E3E6E2;
+    --green:#0D5C46; --green-press:#0A4A38; --green-soft:#E3EFE9;
+    --g2:#8FC3AE; --g3:#3E8A6E; --g4:#0D5C46;
+    --rust:#A63A22; --rust-soft:#F7E9E4;
+    --r-gerente:#0D5C46; --r-gerente-soft:#E3EFE9;
+    --r-recepcionista:#1F5FA8; --r-recepcionista-soft:#E6EEF8;
+    --r-professor:#6C3FA6; --r-professor-soft:#EFE8F8;
+    --r-aluno:#B5540F; --r-aluno-soft:#FAEDE0;
+    --r-super_admin:#16201D; --r-super_admin-soft:#E7E9E7;
+    --radius:14px; --shadow:0 1px 2px rgba(22,32,29,.05), 0 8px 24px rgba(22,32,29,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  #app{min-height:100dvh;display:flex;flex-direction:column}
+
+  .mark{display:inline-flex;align-items:center;gap:.55rem;color:inherit}
+  .mark .plate{width:26px;height:26px;border-radius:50%;border:7px solid var(--green);position:relative;flex:none}
+  .mark .plate::after{content:"";position:absolute;top:-9px;left:50%;width:4px;height:8px;background:var(--bg);transform:translateX(-50%)}
+  .wordmark{font-weight:800;letter-spacing:.14em;font-size:.95rem;text-transform:uppercase}
+  .wordmark b{color:var(--green);font-weight:800}
+
+  .login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:1.25rem;position:relative;overflow:hidden}
+  .login-wrap::before{content:"";position:absolute;top:-190px;right:-190px;width:520px;height:520px;border-radius:50%;border:64px solid #E9EBE8;pointer-events:none}
+  .login-card{position:relative;width:100%;max-width:410px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:2rem 1.75rem 1.75rem;animation:rise .35s ease both}
+  .login-card .mark{margin-bottom:1.6rem}
+  .login-card h1{font-size:1.45rem;font-weight:700}
+  .login-card .sub{color:var(--muted);font-size:.92rem;margin:.25rem 0 1.5rem}
+  .field label{display:block;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+  .field{margin-bottom:1rem}
+  input,select{width:100%;font:inherit;font-size:1rem;color:var(--ink);background:#FAFBFA;
+    border:1.5px solid var(--line);border-radius:10px;padding:.7rem .85rem;min-height:46px;transition:border-color .15s, box-shadow .15s}
+  input:focus,select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font:inherit;font-weight:700;font-size:1rem;
+    border:none;border-radius:10px;cursor:pointer;min-height:48px;padding:.7rem 1.2rem;width:100%;
+    background:var(--green);color:#fff;transition:background .15s, transform .06s}
+  .btn:hover{background:var(--green-press)} .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.55;cursor:default;transform:none}
+  .btn-ghost{background:transparent;color:var(--ink);width:auto;min-height:40px;border:1.5px solid var(--line);
+    font-weight:600;font-size:.9rem;border-radius:10px;padding:.45rem .95rem;cursor:pointer;font-family:inherit}
+  .btn-ghost:hover{border-color:var(--muted);background:#FAFBFA}
+  .btn-mini{font:inherit;font-weight:700;font-size:.82rem;border:none;border-radius:8px;cursor:pointer;
+    padding:.45rem .8rem;background:var(--green);color:#fff}
+  .btn-mini:hover{background:var(--green-press)}
+  .btn-mini:disabled{opacity:.55;cursor:default}
+  .btn-mini.perigo{background:transparent;color:var(--rust);border:1.5px solid var(--rust-soft)}
+  .btn:focus-visible,.btn-ghost:focus-visible,.btn-mini:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.tab:focus-visible{outline:3px solid var(--green-soft);outline-offset:2px}
+  .form-error{display:none;background:var(--rust-soft);color:var(--rust);border-radius:10px;padding:.7rem .9rem;font-size:.9rem;font-weight:500;margin:.6rem 0}
+  .form-error.show{display:block}
+  .aviso-ok{background:var(--green-soft);color:var(--green);border-radius:10px;padding:.7rem .9rem;font-size:.9rem;font-weight:600;margin:.6rem 0}
+  .login-foot{margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;color:var(--ink)}
+
+  .loading-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:var(--muted)}
+  .spinner{width:44px;height:44px;border-radius:50%;border:10px solid var(--green-soft);border-top-color:var(--green);animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .blocked-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:1.25rem}
+  .blocked-card{width:100%;max-width:440px;text-align:center;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:2.4rem 1.75rem;animation:rise .35s ease both}
+  .blocked-card .lock{width:46px;height:46px;border-radius:50%;border:11px solid var(--rust-soft);border-top-color:var(--rust);margin:0 auto 1.3rem;transform:rotate(45deg)}
+  .blocked-card h1{font-size:1.35rem;font-weight:800}
+  .blocked-card p{color:var(--muted);margin:.5rem 0 1.6rem;font-size:.95rem}
+
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);padding:.7rem 1.25rem;
+    display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .panel{flex:1;width:100%;max-width:920px;margin:0 auto;padding:1.6rem 1.25rem 3.5rem;animation:rise .35s ease both}
+  .chip{display:inline-flex;align-items:center;gap:.45rem;font-size:.75rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;padding:.32rem .75rem;border-radius:999px}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+  .panel h1{font-size:clamp(1.5rem,5vw,2.1rem);font-weight:800;letter-spacing:-.02em;margin:.7rem 0 .2rem}
+  .panel .painel-nome{color:var(--muted);font-size:.98rem;margin-bottom:1.4rem}
+  .cartao{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:1.1rem 1.2rem;margin-bottom:1rem}
+  .cartao h2{font-size:1rem;font-weight:700;margin-bottom:.7rem}
+  .cartao h2 small{color:var(--muted);font-weight:500;font-size:.82rem;margin-left:.4rem}
+  .vazio{border:2px dashed var(--line);border-radius:var(--radius);background:var(--card);padding:1.6rem 1.2rem;
+    text-align:center;color:var(--muted);font-size:.92rem}
+  .vazio .ring{width:32px;height:32px;border-radius:50%;border:8px solid var(--line);margin:0 auto .8rem}
+  .lista{list-style:none}
+  .lista li{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--line);font-size:.92rem;flex-wrap:wrap}
+  .lista li:first-child{border-top:none}
+  .sub{color:var(--muted);font-size:.82rem}
+  .badge{font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em}
+  .badge.ok{background:var(--green-soft);color:var(--green)}
+  .badge.off{background:var(--rust-soft);color:var(--rust)}
+  .acoes{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+  .inline-mini{min-height:38px;padding:.4rem .6rem;font-size:.85rem;width:auto}
+  select.inline-mini{width:auto}
+
+  .tabs{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.4rem;margin-bottom:1.1rem;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{font:inherit;font-weight:700;font-size:.88rem;border:1.5px solid var(--line);background:var(--card);color:var(--muted);
+    border-radius:999px;padding:.45rem 1rem;cursor:pointer;white-space:nowrap;transition:all .15s}
+  .tab.ativa{background:var(--green);border-color:var(--green);color:#fff}
+
+  .exercicio{display:flex;gap:.9rem;padding:.8rem 0;border-top:1px solid var(--line);align-items:flex-start}
+  .exercicio:first-of-type{border-top:none}
+  .exercicio .gif{width:86px;height:86px;flex:none;border-radius:10px;background:var(--bg);border:1px solid var(--line);
+    overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:zoom-in;position:relative}
+  .exercicio .gif img{width:100%;height:100%;object-fit:cover}
+  .exercicio .gif canvas{width:100%;height:100%;object-fit:cover}
+  .exercicio .gif .play-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(22,32,29,.28);pointer-events:none}
+  .exercicio .gif .play-hint::before{content:"";width:0;height:0;border-style:solid;border-width:9px 0 9px 15px;border-color:transparent transparent transparent #fff;margin-left:3px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+
+  /* modal de zoom do GIF */
+  .modal-gif{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:1rem;
+    background:rgba(22,32,29,.62);backdrop-filter:blur(2px)}
+  .modal-gif.aberto{display:flex}
+  .modal-gif .caixa{position:relative;width:min(92vw,480px);background:var(--card);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:1rem;animation:rise .25s ease both}
+  .modal-gif .caixa img{display:block;width:100%;max-height:70vh;object-fit:contain;border-radius:10px;background:var(--bg)}
+  .modal-gif .legenda{margin-top:.7rem;text-align:center}
+  .modal-gif .legenda .nome{font-weight:700}
+  .modal-gif .legenda .grupo{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .modal-gif .fechar{position:absolute;top:-14px;right:-14px;width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+    background:var(--ink);color:#fff;font-size:1.15rem;font-weight:700;line-height:1;box-shadow:var(--shadow)}
+  .modal-gif .fechar:hover{background:var(--rust)}
+  @media (max-width:480px){.modal-gif .fechar{top:-10px;right:-10px}}
+  .exercicio .gif .ring{width:26px;height:26px;border-radius:50%;border:7px solid var(--line)}
+  .exercicio .info{flex:1;min-width:0}
+  .exercicio .nome{font-weight:700;font-size:.98rem}
+  .exercicio .grupo{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .specs{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+  .spec{font-size:.78rem;font-weight:600;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.15rem .5rem}
+  .checar{flex:none;align-self:center}
+  .checar input{width:24px;height:24px;min-height:0;accent-color:var(--green);cursor:pointer}
+  .progresso{height:8px;background:var(--bg);border-radius:99px;overflow:hidden;margin:.8rem 0}
+  .progresso i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .25s}
+
+  .form-linha{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.7rem;margin-bottom:.8rem}
+
+  /* busca de exercícios (substitui o datalist, que não abre no Chrome mobile) */
+  .busca-ex{position:relative}
+  .busca-ex input{padding-right:2.4rem}
+  .seta-ex{position:absolute;right:6px;bottom:7px;width:32px;height:32px;border:none;background:none;cursor:pointer;
+    color:var(--muted);font-size:1rem;line-height:1;border-radius:8px}
+  .seta-ex:hover{background:var(--green-soft);color:var(--green)}
+  .sugestoes{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:40;background:var(--card);
+    border:1.5px solid var(--line);border-radius:10px;box-shadow:var(--shadow);max-height:250px;overflow-y:auto;display:none}
+  .sugestoes.aberta{display:block}
+  .sugestoes button{display:block;width:100%;text-align:left;font:inherit;font-size:.9rem;padding:.5rem .8rem;
+    border:none;background:none;cursor:pointer;border-top:1px solid var(--line);color:var(--ink)}
+  .sugestoes button:first-child{border-top:none}
+  .sugestoes button:hover{background:var(--green-soft)}
+  .sugestoes .grupo-sug{display:block;font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .sugestoes .nada{padding:.6rem .8rem;font-size:.85rem;color:var(--muted)}
+  .sugestoes .cab-grupo{position:sticky;top:0;display:flex;align-items:center;gap:.5rem;background:var(--green-soft);
+    padding:.5rem .8rem;font-size:.78rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.05em;
+    border-bottom:1.5px solid var(--line)}
+  .sugestoes .cab-grupo .voltar{border:none;background:none;cursor:pointer;font:inherit;font-weight:800;color:var(--green);padding:.1rem .3rem}
+  .sugestoes button.item-grupo{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+  .sugestoes .qtd{font-size:.72rem;font-weight:700;color:var(--muted);background:var(--bg);
+    border:1px solid var(--line);border-radius:99px;padding:.1rem .5rem}
+
+  /* celebração de treino concluído (substitui o alert() do navegador) */
+  .festa{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;
+    background:rgba(13,92,70,.95);opacity:0;pointer-events:none;transition:opacity .3s}
+  .festa.aberta{opacity:1;pointer-events:auto}
+  .festa .conteudo{text-align:center;color:#fff;padding:1rem;animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+  .festa .check{width:88px;height:88px;border-radius:50%;border:6px solid #fff;margin:0 auto 1.1rem;position:relative}
+  .festa .check::after{content:"";position:absolute;left:24px;top:16px;width:20px;height:38px;
+    border:solid #fff;border-width:0 6px 6px 0;transform:rotate(45deg) scale(0);animation:tick .35s .3s ease-out forwards}
+  .festa h2{font-size:1.5rem;font-weight:800;letter-spacing:-.01em}
+  .festa p{font-size:1rem;opacity:.9;margin-top:.3rem}
+  @keyframes pop{from{transform:scale(.55);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes tick{to{transform:rotate(45deg) scale(1)}}
+
+  @media (max-width:480px){
+    .login-card{padding:1.6rem 1.25rem 1.4rem}
+    .login-wrap::before{width:380px;height:380px;border-width:48px;top:-150px;right:-150px}
+    .topbar{padding:.6rem 1rem}
+    .exercicio .gif{width:70px;height:70px}
+  }
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- Modal de zoom do GIF de exercício -->
+<div class="modal-gif" id="modal-gif" role="dialog" aria-modal="true" aria-label="Demonstração do exercício">
+  <div class="caixa">
+    <button class="fechar" id="modal-gif-fechar" aria-label="Fechar demonstração">✕</button>
+    <img id="modal-gif-img" src="" alt="">
+    <div class="legenda"><div class="grupo" id="modal-gif-grupo"></div><div class="nome" id="modal-gif-nome"></div></div>
+  </div>
+</div>
+
+<script>
+/* Config (chave anon e publica por design; a seguranca real e o RLS) */
+const SUPABASE_URL = "https://sfttqcxdbshdoqlyctgx.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmdHRxY3hkYnNoZG9xbHljdGd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNDQ5NzMsImV4cCI6MjA5OTgyMDk3M30.PE5ei2buaySnyS_bss7_X1bn8SxHCjRb1YywAEaCQtA";
+
+const ROLES = {
+  gerente:{cargo:"Gerente",painel:"Painel do gerente"},
+  recepcionista:{cargo:"Recepcionista",painel:"Painel da recepção"},
+  professor:{cargo:"Professor",painel:"Painel do professor"},
+  aluno:{cargo:"Aluno",painel:"App do aluno"},
+  super_admin:{cargo:"Super admin",painel:"Supervisão FitBase"}
+};
+
+let S = {};
+const app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hojeISO = () => { const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const dataBR = s => { if(!s) return "—"; const [a,m,d]=s.slice(0,10).split("-"); return `${d}/${m}/${a}`; };
+const horaCurta = t => t ? t.slice(0,5) : "—";
+
+/* ---------- normalizacao de nomes de exercicios ----------
+   O script de upload cadastrou nomes com sufixo "(1)", "(2)"…,
+   variações de maiúsculas/acentos e espaços duplicados.
+   normNome() gera uma "chave canônica" para comparação flexível. */
+const normNome = s => String(s ?? "")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g,"")  // remove acentos (Flexão -> flexao)
+  .toLowerCase()                                     // case-insensitive
+  .replace(/\s*\(\d+\)\s*$/,"")                      // remove numeração final "(1)", "(2)"…
+  .replace(/[^a-z0-9]+/g," ")                        // troca especiais/hífens por espaço
+  .trim().replace(/\s+/g," ");                       // colapsa espaços extras
+/* Nome de exibição sem a numeração "(1)" */
+const nomeLimpo = s => String(s ?? "").replace(/\s*\(\d+\)\s*$/,"").replace(/\s+/g," ").trim();
+/* Busca flexível no catálogo, nesta ordem:
+   1. igualdade normalizada
+   2. nome do banco COMEÇA com o nome pedido pela ficha
+   3. nome do banco CONTÉM o nome pedido pela ficha
+   4. inverso (ficha mais longa que o nome do banco)
+   5. todas as palavras da ficha aparecem no nome do banco */
+function buscarExercicio(nome){
+  const alvo=normNome(nome);
+  if(!alvo) return null;
+  if(!S.catalogo.length){
+    console.warn("[FitBase] Catálogo de exercícios vazio — a consulta a `exercicios` retornou 0 linhas (verifique o RLS de leitura para este papel).");
+    return null;
+  }
+  const maisLongo=lista=>lista.length?lista.reduce((a,b)=>normNome(b.nome).length>normNome(a.nome).length?b:a):null;
+  const maisCurto=lista=>lista.length?lista.reduce((a,b)=>normNome(b.nome).length<normNome(a.nome).length?b:a):null;
+  const hit = S.catalogo.find(e=>normNome(e.nome)===alvo)
+      || S.catalogo.find(e=>normNome(e.nome).startsWith(alvo))
+      || S.catalogo.find(e=>normNome(e.nome).includes(alvo))
+      /* todas as palavras da ficha aparecem no nome do banco (ordem livre);
+         entre os candidatos, o nome mais curto é o mais próximo */
+      || maisCurto(S.catalogo.filter(e=>{const n=normNome(e.nome);return alvo.split(" ").every(p=>n.includes(p));}))
+      /* inverso: nome do banco é parte do nome da ficha; prefere o mais específico */
+      || maisLongo(S.catalogo.filter(e=>{const n=normNome(e.nome);return alvo.startsWith(n)||alvo.includes(n);}));
+  if(!hit) console.warn(`[FitBase] Nenhum item do catálogo casou com "${nome}" (chave normalizada: "${alvo}").`);
+  else if(!hit.gif_url) console.warn(`[FitBase] "${nome}" casou com "${hit.nome}", mas esse registro está sem gif_url no banco.`);
+  return hit||null;
+}
+const carregarCatalogo = async () => {
+  if(!S.catalogo.length){
+    try{S.catalogo=await sbGet(`exercicios?select=id,nome,grupo_muscular,gif_url&order=nome&limit=2000`);}
+    catch(_){S.catalogo=[];}
+  }
+  return S.catalogo;
+};
+
+/* ---------- GIFs: parar após 10s + modal de zoom ----------
+   Congelamento: após 10s de exibição, o <img> animado é substituído por um
+   <canvas> com o quadro atual desenhado (fica estático) + ícone de play.
+   O clique no card abre o modal, onde o GIF roda em loop infinito (sem trava). */
+const GIF_TEMPO_MS = 10000;
+function congelarGif(img){
+  if(!img.isConnected) return;                    // card já foi re-renderizado
+  const wrap=img.closest(".gif"); if(!wrap) return;
+  try{
+    const cv=document.createElement("canvas");
+    cv.width=img.naturalWidth||img.clientWidth||86;
+    cv.height=img.naturalHeight||img.clientHeight||86;
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+    img.replaceWith(cv);
+  }catch(_){/* se o canvas falhar (CORS raro), mantém o gif rodando */ return;}
+  const hint=document.createElement("span");
+  hint.className="play-hint"; hint.setAttribute("aria-hidden","true");
+  wrap.appendChild(hint);
+}
+function agendarCongelamento(img){
+  const iniciar=()=>setTimeout(()=>congelarGif(img),GIF_TEMPO_MS);
+  if(img.complete&&img.naturalWidth) iniciar();
+  else img.addEventListener("load",iniciar,{once:true});
+}
+function abrirModalGif(url,nome,grupo){
+  const m=document.getElementById("modal-gif");
+  const img=document.getElementById("modal-gif-img");
+  img.src="";                                     // força o GIF a reiniciar do primeiro quadro
+  img.src=url; img.alt=nome||"Exercício";
+  document.getElementById("modal-gif-nome").textContent=nome||"";
+  document.getElementById("modal-gif-grupo").textContent=grupo||"";
+  m.classList.add("aberto");
+  document.body.style.overflow="hidden";
+}
+function fecharModalGif(){
+  const m=document.getElementById("modal-gif");
+  m.classList.remove("aberto");
+  document.getElementById("modal-gif-img").src="";  // interrompe o loop ao fechar
+  document.body.style.overflow="";
+}
+/* ---------- celebração "Treino concluído" (sem alert do navegador) ---------- */
+function celebrarTreino(){
+  let f=document.getElementById("festa");
+  if(!f){
+    f=document.createElement("div");f.id="festa";f.className="festa";
+    f.setAttribute("role","status");f.setAttribute("aria-live","polite");
+    f.innerHTML=`<div class="conteudo"><div class="check" aria-hidden="true"></div>
+      <h2>Treino concluído!</h2><p>Até a próxima 💪</p></div>`;
+    f.addEventListener("click",()=>f.classList.remove("aberta"));
+    document.body.appendChild(f);
+  }
+  requestAnimationFrame(()=>f.classList.add("aberta"));
+  setTimeout(()=>f.classList.remove("aberta"),2300);   // some sozinha após a animação
+}
+
+/* ---------- busca de exercícios do professor ----------
+   O <datalist> nativo não abre pela setinha no Chrome do Android,
+   então a lista é desenhada pelo app: filtra enquanto digita e a
+   seta ▾ mostra o catálogo completo em ordem alfabética. */
+function catalogoUnico(){
+  const visto=new Set(),lista=[];
+  S.catalogo.forEach(e=>{const k=normNome(e.nome);
+    if(k&&!visto.has(k)){visto.add(k);lista.push(e);}});
+  return lista.sort((a,b)=>nomeLimpo(a.nome).localeCompare(nomeLimpo(b.nome),"pt-BR"));
+}
+function ligarBuscaExercicio(f){
+  const inp=f.querySelector('[data-campo="ex"]');
+  const seta=f.querySelector(".seta-ex");
+  const caixa=f.querySelector(".sugestoes");
+  if(!inp||!caixa) return;
+  const itens=catalogoUnico();
+
+  const linhaEx=e=>`<button type="button" data-v="${esc(nomeLimpo(e.nome))}">${esc(nomeLimpo(e.nome))}<span class="grupo-sug">${esc(e.grupo_muscular||"")}</span></button>`;
+
+  /* modo 1: digitação → lista filtrada */
+  const abrirFiltro=filtro=>{
+    const alvo=normNome(filtro);
+    const lista=alvo?itens.filter(e=>normNome(e.nome).includes(alvo)):itens;
+    caixa.innerHTML=lista.length?lista.map(linhaEx).join(""):`<div class="nada">Nenhum exercício encontrado.</div>`;
+    caixa.classList.add("aberta");caixa.scrollTop=0;
+  };
+  /* modo 2: setinha → abas de grupos musculares */
+  const abrirGrupos=()=>{
+    const grupos={};
+    itens.forEach(e=>{const g=(e.grupo_muscular||"Outros").trim()||"Outros";
+      (grupos[g]=grupos[g]||[]).push(e);});
+    const nomes=Object.keys(grupos).sort((a,b)=>a.localeCompare(b,"pt-BR"));
+    caixa.innerHTML=nomes.map(g=>`<button type="button" class="item-grupo" data-g="${esc(g)}">${esc(g)}<span class="qtd">${grupos[g].length}</span></button>`).join("");
+    caixa.classList.add("aberta");caixa.scrollTop=0;
+  };
+  /* modo 3: dentro de um grupo, com "← Voltar" */
+  const abrirGrupo=g=>{
+    const lista=itens.filter(e=>((e.grupo_muscular||"Outros").trim()||"Outros")===g);
+    caixa.innerHTML=`<div class="cab-grupo"><button type="button" class="voltar" data-voltar="1">←</button>${esc(g)}</div>`
+      +lista.map(linhaEx).join("");
+    caixa.classList.add("aberta");caixa.scrollTop=0;
+  };
+  const fechar=()=>caixa.classList.remove("aberta");
+
+  inp.addEventListener("input",()=>abrirFiltro(inp.value));
+  inp.addEventListener("focus",()=>abrirFiltro(inp.value));
+  if(seta) seta.addEventListener("click",()=>{
+    if(caixa.classList.contains("aberta")){fechar();return;}
+    abrirGrupos();
+  });
+
+  /* Toque seguro para rolagem: o pointerdown só marca a posição inicial
+     (e segura o foco do input); a seleção acontece no pointerup, e apenas
+     se o dedo não se moveu — arrastar para rolar não seleciona nada. */
+  let toqueY=null;
+  caixa.addEventListener("pointerdown",ev=>{ev.preventDefault();toqueY=ev.clientY;});
+  caixa.addEventListener("pointerup",ev=>{
+    if(toqueY!==null&&Math.abs(ev.clientY-toqueY)>10){toqueY=null;return;} // rolou → ignora
+    toqueY=null;
+    const alvo=ev.target;
+    if(alvo.closest("[data-voltar]")){abrirGrupos();return;}
+    const g=alvo.closest("[data-g]");if(g){abrirGrupo(g.dataset.g);return;}
+    const b=alvo.closest("[data-v]");if(b){inp.value=b.dataset.v;fechar();}
+  });
+  document.addEventListener("pointerdown",ev=>{
+    if(!f.contains(ev.target))fechar();
+  });
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const m=document.getElementById("modal-gif");
+  document.getElementById("modal-gif-fechar").addEventListener("click",fecharModalGif);
+  m.addEventListener("click",ev=>{if(ev.target===m)fecharModalGif();});
+  document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&m.classList.contains("aberto"))fecharModalGif();});
+});
+
+/* ---------- sessão persistente ----------
+   Guarda só o refresh_token no localStorage; ao abrir o app,
+   troca por um access_token novo. Recarregar a página não desloga. */
+const LS_SESSAO="fitbase_sessao_v1";
+const salvarSessao=d=>{try{localStorage.setItem(LS_SESSAO,JSON.stringify({refresh:d.refresh_token}))}catch(_){}};
+const limparSessao=()=>{try{localStorage.removeItem(LS_SESSAO)}catch(_){}};
+const estadoInicial=()=>({sessao:null,perfil:null,aluno:null,treinos:[],treinoAtual:null,checks:{},historico:[],catalogo:[]});
+async function retomarSessao(){
+  S=estadoInicial();
+  let salvo=null; try{salvo=JSON.parse(localStorage.getItem(LS_SESSAO)||"null");}catch(_){}
+  if(!salvo?.refresh){renderLogin();return;}
+  renderLoading("Retomando sua sessão…");
+  try{
+    const {ok,data}=await apiAuth("token?grant_type=refresh_token",{refresh_token:salvo.refresh});
+    if(!ok||!data?.access_token){limparSessao();renderLogin();return;}
+    S.sessao={token:data.access_token,userId:data.user.id};
+    salvarSessao(data);                    // o refresh_token rotaciona a cada uso
+    await entrarNoApp();
+  }catch(_){renderLogin("Sem conexão para retomar a sessão. Entre novamente.");}
+}
+
+/* ---------- camada de dados ---------- */
+const cab = extra => ({apikey:SUPABASE_KEY, Authorization:`Bearer ${S.sessao.token}`, ...extra});
+
+async function apiAuth(path, body){
+  const r = await fetch(`${SUPABASE_URL}/auth/v1/${path}`,{method:"POST",
+    headers:{apikey:SUPABASE_KEY,"Content-Type":"application/json",
+      ...(S.sessao?{Authorization:`Bearer ${S.sessao.token}`}:{})},
+    body: body?JSON.stringify(body):undefined});
+  let data=null; try{data=await r.json();}catch(_){}
+  return {ok:r.ok,status:r.status,data};
+}
+async function sbGet(q){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${q}`,{headers:cab()});
+  if(!r.ok) throw new Error(`GET ${r.status}`);
+  return r.json();
+}
+async function sbSend(method,q,body,prefer){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${q}`,{method,
+    headers:cab({"Content-Type":"application/json",...(prefer?{Prefer:prefer}:{})}),
+    body: body?JSON.stringify(body):undefined});
+  if(!r.ok){
+    /* lê o corpo do erro do Supabase (message/details/hint) para diagnóstico no console */
+    let corpo=null; try{corpo=await r.json();}catch(_){try{corpo=await r.text();}catch(__){}}
+    const e=new Error(`${method} ${r.status}`);e.status=r.status;e.body=corpo;throw e;
+  }
+  return r.status===204?null:r.json().catch(()=>null);
+}
+/* Bloqueio: ESTRITAMENTE via RPC — nenhuma leitura da tabela academias
+   por funcionarios/alunos (regra das etapas 4-6) */
+async function rpcLiberada(){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/academia_liberada`,{
+    method:"POST",headers:cab({"Content-Type":"application/json"}),body:"{}"});
+  if(!r.ok) throw new Error(`RPC ${r.status}`);
+  return (await r.json())===true;
+}
+
+/* ---------- telas base ---------- */
+const markHTML = () => `<span class="mark"><span class="plate" aria-hidden="true"></span>
+  <span class="wordmark">Fit<b>Base</b></span></span>`;
+
+function topbarHTML(){
+  const info=ROLES[S.perfil.role]||{cargo:S.perfil.role};
+  return `<header class="topbar">${markHTML()}
+    <span class="chip" style="color:var(--r-${S.perfil.role},var(--green));background:var(--r-${S.perfil.role}-soft,var(--green-soft))">
+      <span class="dot"></span>${esc(info.cargo)}</span>
+    <button class="btn-ghost" id="sair">Sair</button></header>`;
+}
+const ligarSair = () => document.getElementById("sair").addEventListener("click", sair);
+
+function renderLogin(msg){
+  S = estadoInicial();
+  app.innerHTML = `
+  <div class="login-wrap"><div class="login-card">
+    ${markHTML()}
+    <h1>Entrar</h1>
+    <p class="sub">Acesse com a conta criada pela sua academia.</p>
+    <div class="form-error ${msg?"show":""}" role="alert" aria-live="assertive" id="err">${esc(msg||"")}</div>
+    <form id="f" novalidate>
+      <div class="field"><label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="voce@academia.com" required></div>
+      <div class="field"><label for="senha">Senha</label>
+        <input id="senha" type="password" autocomplete="current-password" placeholder="Sua senha" required></div>
+      <button class="btn" id="entrar" type="submit">Entrar</button>
+    </form>
+    <div class="login-foot">Acesso restrito. Contas são criadas pela administração da academia.</div>
+  </div></div>`;
+  document.getElementById("f").addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const email=document.getElementById("email").value.trim();
+    const senha=document.getElementById("senha").value;
+    const err=document.getElementById("err"); err.classList.remove("show");
+    if(!email||!senha){err.textContent="Informe e-mail e senha para entrar.";err.classList.add("show");return;}
+    const btn=document.getElementById("entrar"); btn.disabled=true; btn.textContent="Entrando…";
+    try{
+      const {ok,status,data}=await apiAuth("token?grant_type=password",{email,password:senha});
+      if(!ok){err.textContent=(status===400||status===401)?"E-mail ou senha incorretos.":"Não foi possível entrar agora. Tente novamente.";
+        err.classList.add("show");btn.disabled=false;btn.textContent="Entrar";return;}
+      S.sessao={token:data.access_token,userId:data.user.id};
+      salvarSessao(data);
+      await entrarNoApp();
+    }catch(_){
+      err.textContent="Sem conexão com o servidor. Se você está na pré-visualização do Claude, baixe o arquivo e abra direto no navegador.";
+      err.classList.add("show");btn.disabled=false;btn.textContent="Entrar";
+    }
+  });
+}
+
+const renderLoading = t => app.innerHTML =
+  `<div class="loading-wrap"><div class="spinner" aria-hidden="true"></div><p>${esc(t)}</p></div>`;
+
+function renderBloqueio(){
+  app.innerHTML=`<div class="blocked-wrap"><div class="blocked-card">
+    <div class="lock" aria-hidden="true"></div>
+    <h1>Acesso suspenso.</h1><p>Entre em contato com a administração.</p>
+    <button class="btn" id="sair" style="max-width:220px">Sair</button></div></div>`;
+  document.getElementById("sair").addEventListener("click", sair);
+}
+async function sair(){ limparSessao(); try{await apiAuth("logout");}catch(_){} renderLogin(); }
+
+/* ---------- roteamento ---------- */
+async function entrarNoApp(){
+  renderLoading("Carregando seu acesso…");
+  try{
+    const perfis = await sbGet(`profiles?id=eq.${S.sessao.userId}&select=id,nome,role,academia_id`);
+    if(!perfis.length){renderLogin("Sua conta ainda não tem um perfil configurado. Fale com a administração.");return;}
+    S.perfil = perfis[0];
+    if(S.perfil.role==="super_admin"){ await renderSuperAdmin(); return; }
+    if(!(await rpcLiberada())){ renderBloqueio(); return; }
+    if(S.perfil.role==="aluno"){ await renderAluno(); } else { await renderStaff(); }
+  }catch(_){ renderLogin("Não foi possível carregar seus dados. Tente entrar novamente."); }
+}
+
+function shell(subtitulo, corpo){
+  app.innerHTML = topbarHTML()+`<main class="panel">
+    <h1>Bem-vindo, ${esc(S.perfil.nome)}</h1>
+    <p class="painel-nome">${esc(subtitulo)}</p>${corpo}</main>`;
+  ligarSair();
+}
+
+/* ============================================================
+   APP DO ALUNO
+============================================================ */
+async function renderAluno(){
+  renderLoading("Preparando seu treino…");
+  const alunos = await sbGet(`alunos?profile_id=eq.${S.sessao.userId}&select=id,matricula,plano,status`);
+  if(!alunos.length){
+    shell(ROLES.aluno.painel, `<div class="vazio"><div class="ring"></div><strong>Sua matrícula ainda não foi cadastrada.</strong><br>Fale com a recepção da sua academia.</div>`);
+    return;
+  }
+  S.aluno = alunos[0];
+  S.historico = await sbGet(`historico_treinos?select=treino_id,concluido_em&order=concluido_em.desc&limit=400`);
+  shell(`Matrícula ${S.aluno.matricula||"—"} · Plano ${S.aluno.plano||"—"}`, `
+    <nav class="tabs" role="tablist">
+      ${[["treino","Treino do dia"],["cardio","Cardio"],["prs","Recordes"],["agenda","Agenda"]]
+        .map(([id,rot])=>`<button class="tab" data-tab="${id}" role="tab">${rot}</button>`).join("")}
+    </nav><div id="tab-conteudo"></div>`);
+  document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>abrirTab(b.dataset.tab)));
+  abrirTab("treino");
+}
+
+function abrirTab(id){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("ativa",b.dataset.tab===id));
+  const alvo=document.getElementById("tab-conteudo");
+  alvo.innerHTML=`<div class="loading-wrap" style="padding:2rem 0"><div class="spinner"></div></div>`;
+  ({treino:tabTreino,cardio:tabCardio,prs:tabPRs,agenda:tabAgenda})[id](alvo)
+    .catch(()=>{alvo.innerHTML=`<div class="vazio">Não foi possível carregar. Tente novamente.</div>`;});
+}
+
+/* ---------- rotação automática de fichas (A → B → C → … → A) ----------
+   A sequência é a ordem alfabética dos nomes das fichas ("Treino A",
+   "Treino B"…), com qualquer quantidade de fichas (2, 3, 4…).
+   Regra: a ficha de hoje é a SEGUINTE à última concluída no histórico.
+   Se a última conclusão foi hoje, mostra a própria ficha de hoje (já
+   concluída). Se o aluno nunca concluiu nada, pergunta qual é a de hoje. */
+function ordenarFichas(){
+  S.treinos.sort((a,b)=>String(a.nome_treino).localeCompare(String(b.nome_treino),"pt-BR",{numeric:true,sensitivity:"base"}));
+}
+function fichaDeHoje(){
+  /* última conclusão cujo treino ainda existe entre as fichas atuais
+     (ignora registros de fichas apagadas pelo professor) */
+  const ult=S.historico.find(h=>h.treino_id&&S.treinos.some(t=>t.id===h.treino_id));
+  if(!ult) return null;                                   // 1º acesso: perguntar
+  const i=S.treinos.findIndex(t=>t.id===ult.treino_id);
+  return ult.concluido_em.slice(0,10)===hojeISO()
+    ? S.treinos[i].id                                     // hoje já foi: mostra a concluída
+    : S.treinos[(i+1)%S.treinos.length].id;               // senão: a próxima da sequência
+}
+
+/* aba: treino do dia */
+async function tabTreino(el){
+  if(!S.treinos.length) S.treinos = await sbGet(`treinos?select=id,nome_treino&order=criado_em.desc`);
+  if(!S.treinos.length){
+    el.innerHTML=`<div class="vazio"><div class="ring"></div><strong>Nenhum treino prescrito ainda.</strong><br>Seu professor vai montar sua ficha em breve.</div>`;return;
+  }
+  ordenarFichas();
+  if(!S.treinoAtual){
+    const sugestao=fichaDeHoje();
+    if(sugestao) S.treinoAtual=sugestao;
+    else if(S.treinos.length===1) S.treinoAtual=S.treinos[0].id;
+    else{
+      /* primeiro acesso com 2+ fichas: pergunta qual é o treino de hoje */
+      el.innerHTML=`<div class="cartao">
+        <h2>Qual é o seu treino de hoje?</h2>
+        <p class="sub" style="margin:.2rem 0 1rem">Primeira vez por aqui! Escolha a ficha de hoje — a partir de amanhã eu sigo a sequência sozinho: ${S.treinos.map(t=>esc(t.nome_treino)).join(" → ")} → …</p>
+        <div class="acoes" style="gap:.6rem">
+          ${S.treinos.map(t=>`<button class="btn" style="width:auto;min-width:120px" data-escolha="${t.id}">${esc(t.nome_treino)}</button>`).join("")}
+        </div></div>`;
+      el.querySelectorAll("[data-escolha]").forEach(b=>b.addEventListener("click",()=>{
+        S.treinoAtual=b.dataset.escolha;S.checks={};abrirTab("treino");
+      }));
+      return;
+    }
+  }
+  const [ficha]=await Promise.all([
+    sbGet(`treino_exercicios?treino_id=eq.${S.treinoAtual}&select=id,series,repeticoes,carga,descanso,exercicios(nome,grupo_muscular,gif_url)`),
+    carregarCatalogo()
+  ]);
+  const jaHoje = S.historico.some(h=>h.concluido_em.slice(0,10)===hojeISO());
+  const feitos = ficha.filter(x=>S.checks[x.id]).length;
+  const pct = ficha.length?Math.round(100*feitos/ficha.length):0;
+
+  el.innerHTML=`<div class="cartao">
+    ${S.treinos.length>1?`<div class="field"><label for="sel-treino">Ficha de hoje <span style="text-transform:none;font-weight:500">(sequência automática — pode trocar se precisar)</span></label>
+      <select id="sel-treino">${S.treinos.map(t=>`<option value="${t.id}" ${t.id===S.treinoAtual?"selected":""}>${esc(t.nome_treino)}</option>`).join("")}</select></div>`
+      :`<h2>${esc(S.treinos[0].nome_treino)}</h2>`}
+    ${ficha.length?`
+      <div class="progresso" aria-hidden="true"><i style="width:${pct}%"></i></div>
+      ${ficha.map(x=>{const e=x.exercicios||{};
+        /* resolve sempre via catálogo: cobre nome com "(1)", caixa,
+           acentos e também serve de URL reserva se o gif principal falhar */
+        const cat=buscarExercicio(e.nome);
+        const gifUrl=e.gif_url||cat?.gif_url||"";
+        const gifReserva=(cat?.gif_url&&cat.gif_url!==gifUrl)?cat.gif_url:"";
+        const grupo=e.grupo_muscular||cat?.grupo_muscular||"";
+        const nomeExib=nomeLimpo(e.nome)||"Exercício";
+        return `
+        <div class="exercicio">
+          <div class="gif" ${gifUrl?`data-zoom-url="${esc(gifUrl)}" data-zoom-nome="${esc(nomeExib)}" data-zoom-grupo="${esc(grupo)}" role="button" tabindex="0" aria-label="Ampliar demonstração de ${esc(nomeExib)}"`:""}>${gifUrl?`<img src="${esc(gifUrl)}" data-gif-reserva="${esc(gifReserva)}" alt="${esc(nomeExib)}" loading="lazy">`:`<div class="ring" aria-hidden="true"></div>`}</div>
+          <div class="info">
+            <div class="grupo">${esc(grupo)}</div>
+            <div class="nome">${esc(nomeExib)}</div>
+            <div class="specs">
+              ${x.series?`<span class="spec">${x.series}×${x.repeticoes??"—"}</span>`:""}
+              ${x.carga?`<span class="spec">${esc(x.carga)}</span>`:""}
+              ${x.descanso?`<span class="spec">⏱ ${esc(x.descanso)}</span>`:""}
+            </div>
+          </div>
+          <label class="checar"><input type="checkbox" data-ex="${x.id}" ${S.checks[x.id]?"checked":""} aria-label="Concluir ${esc(nomeExib)}"></label>
+        </div>`;}).join("")}
+      ${jaHoje?`<button class="btn" disabled style="background:#9AA39F;cursor:default">Treino Concluído ✅</button>`
+        :`<button class="btn" id="concluir" ${feitos===ficha.length&&ficha.length?"":"disabled"}>Concluir treino de hoje</button>`}
+    `:`<div class="vazio"><div class="ring"></div><strong>Esta ficha ainda não tem exercícios.</strong></div>`}
+  </div>`;
+
+  const sel=document.getElementById("sel-treino");
+  if(sel) sel.addEventListener("change",()=>{S.treinoAtual=sel.value;S.checks={};abrirTab("treino");});
+  el.querySelectorAll(".gif img").forEach(img=>{
+    img.addEventListener("error",()=>{
+      const reserva=img.dataset.gifReserva;
+      console.warn(`[FitBase] Falha ao carregar GIF: ${img.src}${reserva?" — tentando URL do catálogo.":""}`);
+      if(reserva){img.dataset.gifReserva="";img.src=reserva;}
+      else img.closest(".gif").innerHTML='<div class="ring" aria-hidden="true"></div>';
+    });
+    agendarCongelamento(img);   // trava de 10s: o GIF do card fica estático
+  });
+  el.querySelectorAll(".gif[data-zoom-url]").forEach(g=>{
+    const abrir=()=>abrirModalGif(g.dataset.zoomUrl,g.dataset.zoomNome,g.dataset.zoomGrupo);
+    g.addEventListener("click",abrir);
+    g.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();abrir();}});
+  });
+  el.querySelectorAll("input[type=checkbox]").forEach(c=>c.addEventListener("change",()=>{
+    S.checks[c.dataset.ex]=c.checked;abrirTab("treino");}));
+  const bt=document.getElementById("concluir");
+  if(bt) bt.addEventListener("click", async ()=>{
+    bt.disabled=true;bt.textContent="Registrando…";
+    try{
+      /* INSERT real: id do aluno + id do treino + data atual */
+      const quando=new Date().toISOString();
+      await sbSend("POST","historico_treinos",
+        {aluno_id:S.aluno.id,treino_id:S.treinoAtual,concluido_em:quando},
+        "return=representation");
+      S.historico.unshift({treino_id:S.treinoAtual,concluido_em:quando});
+      /* estado concluído: cinza, desabilitado, sem re-render (checkboxes preservados) */
+      bt.textContent="Treino Concluído ✅";
+      bt.style.background="#9AA39F";bt.style.cursor="default";
+      el.querySelectorAll("input[type=checkbox]").forEach(c=>c.disabled=true);
+      celebrarTreino();
+    }catch(e){
+      /* fallback: alguns bancos não expõem a coluna concluido_em no INSERT (default now()) */
+      if(e.status===400||e.status===422||e.status===403){
+        try{
+          await sbSend("POST","historico_treinos",{aluno_id:S.aluno.id,treino_id:S.treinoAtual});
+          S.historico.unshift({treino_id:S.treinoAtual,concluido_em:new Date().toISOString()});
+          bt.textContent="Treino Concluído ✅";
+          bt.style.background="#9AA39F";bt.style.cursor="default";
+          el.querySelectorAll("input[type=checkbox]").forEach(c=>c.disabled=true);
+          celebrarTreino();
+          return;
+        }catch(e2){e=e2;}
+      }
+      alert(`Não foi possível salvar o treino (erro ${e.status||"de conexão"}). Verifique sua conexão e as permissões (RLS) e tente novamente.`);
+      bt.disabled=false;bt.textContent="Concluir treino de hoje";
+    }
+  });
+}
+
+/* aba: cardio */
+async function tabCardio(el){
+  const regs = await sbGet(`historico_cardio?select=id,tempo_minutos,distancia_km,calorias,criado_em&order=criado_em.desc&limit=30`);
+  const corte=new Date(); corte.setDate(corte.getDate()-7);
+  const semana=regs.filter(r=>new Date(r.criado_em)>=corte);
+  const somaMin=semana.reduce((s,r)=>s+(r.tempo_minutos||0),0);
+  const somaKm=semana.reduce((s,r)=>s+Number(r.distancia_km||0),0);
+  el.innerHTML=`<div class="cartao"><h2>Registrar cardio</h2>
+    <form id="f-cardio">
+      <div class="form-linha">
+        <div class="field"><label>Minutos</label><input id="c-min" type="number" min="1" max="180" inputmode="numeric" required></div>
+        <div class="field"><label>Distância (km)</label><input id="c-km" type="number" step="0.1" min="0" max="42" inputmode="decimal"></div>
+        <div class="field"><label>Calorias <span style="text-transform:none;font-weight:500">(opcional)</span></label><input id="c-cal" type="number" min="0" inputmode="numeric" placeholder="auto"></div>
+      </div><button class="btn" type="submit">Salvar sessão</button>
+    </form></div>
+  <div class="cartao"><h2>Últimos 7 dias <small>${semana.length} sessões · ${somaMin} min · ${somaKm.toFixed(1)} km</small></h2>
+    ${regs.length?`<ul class="lista">${regs.map(r=>{
+      const pace=r.distancia_km>0&&r.tempo_minutos?` · ${(r.tempo_minutos/Number(r.distancia_km)).toFixed(1)} min/km`:"";
+      return `<li><span>${dataBR(r.criado_em)}<span class="sub"> · ${r.tempo_minutos??"—"} min${r.distancia_km?` · ${Number(r.distancia_km).toFixed(1)} km`:""}${pace}</span></span>
+        <span class="sub">${r.calorias?`${r.calorias} kcal`:""}</span></li>`;}).join("")}</ul>`
+      :`<div class="vazio">Sua primeira sessão de cardio aparece aqui.</div>`}
+  </div>`;
+  document.getElementById("f-cardio").addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const minutos=+document.getElementById("c-min").value||0;
+    const km=document.getElementById("c-km").value===""?null:+document.getElementById("c-km").value;
+    let calorias=document.getElementById("c-cal").value===""?null:+document.getElementById("c-cal").value;
+    /* travas de validação */
+    if(!minutos||minutos<1||minutos>180){alert("Minutos inválidos: informe um valor entre 1 e 180.");return;}
+    if(km!==null&&(isNaN(km)||km<0||km>42)){alert("Distância inválida: informe um valor entre 0 e 42 km.");return;}
+    if(calorias!==null&&(isNaN(calorias)||calorias<0)){alert("Calorias inválidas: não pode ser negativo.");return;}
+    /* calorias em branco → estimativa automática (minutos × 7) */
+    if(calorias===null) calorias=minutos*7;
+    const corpo={aluno_id:S.aluno.id,tempo_minutos:minutos,distancia_km:km,calorias};
+    try{await sbSend("POST","historico_cardio",corpo);abrirTab("cardio");}catch(_){}
+  });
+}
+
+/* aba: recordes (upsert) — restrito aos exercícios das fichas do aluno */
+async function tabPRs(el){
+  if(!S.treinos.length){try{S.treinos=await sbGet(`treinos?select=id,nome_treino&order=criado_em.desc`);}catch(_){S.treinos=[];}}
+  /* exercícios presentes nas fichas de treino deste aluno (treino_exercicios) */
+  let itens=[];
+  if(S.treinos.length){
+    try{itens=await sbGet(`treino_exercicios?treino_id=in.(${S.treinos.map(t=>t.id).join(",")})&select=exercicio_id,exercicios(id,nome)`);}catch(_){itens=[];}
+  }
+  const meusMap=new Map();
+  itens.forEach(i=>{const e=i.exercicios;if(e&&!meusMap.has(e.id))meusMap.set(e.id,{id:e.id,nome:e.nome});});
+  const meus=[...meusMap.values()].sort((a,b)=>nomeLimpo(a.nome).localeCompare(nomeLimpo(b.nome),"pt-BR"));
+
+  const prs = await sbGet(`recordes_pessoais?select=maior_carga,atualizado_em,exercicios(nome)&order=atualizado_em.desc`);
+  el.innerHTML=`<div class="cartao"><h2>Novo recorde</h2>
+    ${meus.length?`
+    <form id="f-pr">
+      <div class="form-linha">
+        <div class="field"><label>Exercício <span style="text-transform:none;font-weight:500">(da sua ficha)</span></label>
+          <select id="pr-ex">${meus.map(e=>`<option value="${e.id}">${esc(nomeLimpo(e.nome))}</option>`).join("")}</select></div>
+        <div class="field"><label>Maior carga</label><input id="pr-carga" placeholder="ex.: 80kg" required></div>
+      </div>
+      <div class="form-error" id="pr-err"></div>
+      <button class="btn" type="submit">Salvar recorde</button>
+    </form>`
+    :`<div class="vazio"><div class="ring"></div><strong>Sua ficha ainda não tem exercícios.</strong><br>Os recordes ficam disponíveis quando seu professor montar seu treino.</div>`}
+  </div>
+  <div class="cartao"><h2>Seus recordes</h2>
+    ${prs.length?`<ul class="lista">${prs.map(p=>`<li><span>${esc(nomeLimpo(p.exercicios?.nome)||"—")}</span>
+      <span><strong>${esc(p.maior_carga||"—")}</strong> <span class="sub">· ${dataBR(p.atualizado_em)}</span></span></li>`).join("")}</ul>`
+      :`<div class="vazio">Registre sua primeira carga máxima. 🏋️</div>`}
+  </div>`;
+  const f=document.getElementById("f-pr");
+  if(f) f.addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const err=document.getElementById("pr-err"); err.classList.remove("show");
+    const exId=document.getElementById("pr-ex").value;
+    if(!meusMap.has(exId)){err.textContent="Escolha um exercício da sua ficha.";err.classList.add("show");return;}
+    try{
+      await sbSend("POST","recordes_pessoais?on_conflict=aluno_id,exercicio_id",
+        {aluno_id:S.aluno.id,exercicio_id:exId,maior_carga:document.getElementById("pr-carga").value.trim(),
+         atualizado_em:new Date().toISOString()},"resolution=merge-duplicates");
+      abrirTab("prs");
+    }catch(_){err.textContent="Não foi possível salvar. Tente novamente.";err.classList.add("show");}
+  });
+}
+
+/* aba: agenda */
+async function tabAgenda(el){
+  const [grades,reservas]=await Promise.all([
+    sbGet(`grades_horarios?select=id,nome_classe,horario,vagas_totais&order=horario`),
+    sbGet(`reservas_horarios?select=id,data_reserva,grade_id&order=data_reserva.desc&limit=20`)
+  ]);
+  const minhasHoje=new Set(reservas.filter(r=>r.data_reserva===hojeISO()).map(r=>r.grade_id));
+  const nomeGrade=id=>grades.find(g=>g.id===id)?.nome_classe||"Aula";
+  el.innerHTML=`<div class="cartao"><h2>Aulas de hoje <small>${dataBR(hojeISO())}</small></h2>
+    ${grades.length?`<ul class="lista">${grades.map(g=>`
+      <li><span><strong>${esc(g.nome_classe)}</strong><span class="sub"> · ${horaCurta(g.horario)} · ${g.vagas_totais??"—"} vagas</span></span>
+      ${minhasHoje.has(g.id)?`<span class="badge ok">Reservado</span>`
+        :`<button class="btn-mini" data-grade="${g.id}">Reservar vaga</button>`}</li>`).join("")}</ul>`
+      :`<div class="vazio">Nenhuma aula na grade da sua academia ainda.</div>`}
+    <div class="form-error" id="ag-err"></div></div>
+  <div class="cartao"><h2>Minhas reservas</h2>
+    ${reservas.length?`<ul class="lista">${reservas.map(r=>`
+      <li><span>${esc(nomeGrade(r.grade_id))}<span class="sub"> · ${dataBR(r.data_reserva)}</span></span>
+      <button class="btn-mini perigo" data-res="${r.id}">Cancelar</button></li>`).join("")}</ul>`
+      :`<div class="vazio">Reserve sua primeira aula acima.</div>`}
+  </div>`;
+  const err=document.getElementById("ag-err");
+  el.querySelectorAll("[data-grade]").forEach(b=>b.addEventListener("click", async ()=>{
+    b.disabled=true;err.classList.remove("show");
+    try{await sbSend("POST","reservas_horarios",{grade_id:b.dataset.grade,aluno_id:S.aluno.id,data_reserva:hojeISO()});abrirTab("agenda");}
+    catch(e){err.textContent=e.status===409?"Você já tem reserva nessa aula hoje.":"Não foi possível reservar. Tente novamente.";
+      err.classList.add("show");b.disabled=false;}
+  }));
+  el.querySelectorAll("[data-res]").forEach(b=>b.addEventListener("click", async ()=>{
+    b.disabled=true;
+    try{await sbSend("DELETE",`reservas_horarios?id=eq.${b.dataset.res}`);abrirTab("agenda");}catch(_){b.disabled=false;}
+  }));
+}
+
+/* ============================================================
+   PAINEIS DE STAFF — CRUD real conforme o RLS de cada cargo
+============================================================ */
+async function renderStaff(){
+  renderLoading("Carregando seu painel…");
+  const papel = S.perfil.role;
+  try{
+    if(papel==="recepcionista") await painelRecepcao();
+    else if(papel==="gerente")  await painelGerente();
+    else                        await painelProfessor();
+  }catch(_){
+    shell(ROLES[papel]?.painel||"Painel", `<div class="vazio">Não foi possível carregar os dados. Recarregue a página.</div>`);
+  }
+}
+const erroInline = (id,msg)=>{const e=document.getElementById(id);e.textContent=msg;e.classList.add("show");};
+
+/* Recepcao: CRUD completo de alunos (RLS staff_* da etapa 1/4) */
+async function painelRecepcao(){
+  const [alunos,perfisAluno,grades]=await Promise.all([
+    sbGet(`alunos?select=id,profile_id,matricula,plano,status,telefone,profiles(nome)&order=matricula`),
+    sbGet(`profiles?role=eq.aluno&select=id,nome,academia_id&order=nome`),
+    sbGet(`grades_horarios?select=id,nome_classe,horario,vagas_totais&order=horario`).catch(()=>[])
+  ]);
+  const comMatricula=new Set(alunos.map(a=>a.profile_id));
+  const semMatricula=perfisAluno.filter(p=>!comMatricula.has(p.id));
+
+  shell(ROLES.recepcionista.painel, `
+  <div class="cartao"><h2>Criar conta de aluno</h2>
+    <p class="sub" style="margin:-.3rem 0 .8rem">Cria o login que o aluno usará no celular. Depois, matricule-o no quadro abaixo.</p>
+    <form id="f-conta">
+      <div class="form-linha">
+        <div class="field"><label>Nome completo</label><input id="ct-nome" autocomplete="off" placeholder="Ana Silva" required></div>
+        <div class="field"><label>E-mail</label><input id="ct-email" type="email" autocomplete="off" inputmode="email" placeholder="ana@email.com" required></div>
+        <div class="field"><label>Senha inicial</label><input id="ct-senha" autocomplete="off" placeholder="mín. 8 caracteres" required></div>
+      </div>
+      <div class="form-error" id="ct-err" role="alert"></div>
+      <div class="aviso-ok" id="ct-ok" style="display:none"></div>
+      <button class="btn" type="submit" id="ct-btn">Criar conta</button>
+    </form>
+  </div>
+  <div class="cartao"><h2>Nova matrícula</h2>
+    ${semMatricula.length?`
+    <form id="f-novo">
+      <div class="form-linha">
+        <div class="field"><label>Aluno (perfil existente)</label>
+          <select id="n-perfil">${semMatricula.map(p=>`<option value="${p.id}">${esc(p.nome)}</option>`).join("")}</select></div>
+        <div class="field"><label>Matrícula</label><input id="n-mat" placeholder="AD-0002" required></div>
+        <div class="field"><label>Plano</label><input id="n-plano" placeholder="mensal"></div>
+        <div class="field"><label>Telefone</label><input id="n-tel" inputmode="tel" placeholder="(21) 9…"></div>
+      </div>
+      <div class="form-error" id="n-err"></div>
+      <button class="btn" type="submit">Matricular aluno</button>
+    </form>`
+    :`<div class="vazio">Todos os perfis de aluno já têm matrícula. A criação de novas contas segue com a administração.</div>`}
+  </div>
+  <div class="cartao"><h2>Alunos da academia <small>${alunos.length} registro(s)</small></h2>
+    ${alunos.length?`<ul class="lista">${alunos.map(a=>`
+      <li><span><strong>${esc(a.profiles?.nome||"—")}</strong><span class="sub"> · ${esc(a.matricula||"—")}${a.telefone?` · ${esc(a.telefone)}`:""}</span></span>
+        <span class="acoes">
+          <input class="inline-mini" style="max-width:110px" value="${esc(a.plano||"")}" placeholder="plano" data-plano="${a.id}">
+          <select class="inline-mini" data-status="${a.id}">
+            ${["ativo","inativo","trancado"].map(s=>`<option ${a.status===s?"selected":""}>${s}</option>`).join("")}</select>
+          <button class="btn-mini" data-salvar="${a.id}">Salvar</button>
+          <button class="btn-mini perigo" data-excluir="${a.id}">Excluir</button>
+        </span></li>`).join("")}</ul>`
+      :`<div class="vazio">Nenhum aluno matriculado ainda.</div>`}
+    <div class="form-error" id="l-err"></div>
+  </div>
+  <div class="cartao"><h2>Aulas coletivas <small>grade semanal — aparece na agenda dos alunos</small></h2>
+    ${grades.length?`<ul class="lista">${grades.map(g=>`
+      <li><span><strong>${esc(g.nome_classe)}</strong><span class="sub"> · ${horaCurta(g.horario)} · ${g.vagas_totais??"—"} vagas</span></span>
+        <button class="btn-mini perigo" data-rm-grade="${g.id}">Remover</button></li>`).join("")}</ul>`
+      :`<p class="sub" style="margin-bottom:.6rem">Nenhuma aula cadastrada — crie a primeira abaixo.</p>`}
+    <form id="f-grade" style="margin-top:.7rem">
+      <div class="form-linha">
+        <div class="field"><label>Nome da aula</label><input id="gr-nome" placeholder="Spinning" required></div>
+        <div class="field"><label>Horário</label><input id="gr-hora" type="time" required></div>
+        <div class="field"><label>Vagas</label><input id="gr-vagas" type="number" min="1" max="200" inputmode="numeric" placeholder="20" required></div>
+      </div>
+      <div class="form-error" id="gr-err"></div>
+      <button class="btn" type="submit">Adicionar aula</button>
+    </form>
+  </div>`);
+
+  /* aulas coletivas: criar e remover */
+  const fg=document.getElementById("f-grade");
+  if(fg) fg.addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const err=document.getElementById("gr-err"); err.classList.remove("show");
+    const vagas=+document.getElementById("gr-vagas").value;
+    if(!vagas||vagas<1||vagas>200){err.textContent="Informe um número de vagas entre 1 e 200.";err.classList.add("show");return;}
+    try{
+      await sbSend("POST","grades_horarios",{
+        academia_id:S.perfil.academia_id,
+        nome_classe:document.getElementById("gr-nome").value.trim(),
+        horario:document.getElementById("gr-hora").value,
+        vagas_totais:vagas});
+      renderStaff();
+    }catch(e){
+      console.error("[FitBase] Falha ao criar aula:",e.status,e.body);
+      err.textContent=e.status===403?"A regra de segurança (RLS) bloqueou — confira se seu perfil tem academia_id.":"Não foi possível criar a aula. Tente novamente.";
+      err.classList.add("show");
+    }
+  });
+  document.querySelectorAll("[data-rm-grade]").forEach(b=>b.addEventListener("click", async ()=>{
+    if(!confirm("Remover esta aula da grade? As reservas já feitas nela serão apagadas."))return;
+    b.disabled=true;
+    try{
+      await sbSend("DELETE",`reservas_horarios?grade_id=eq.${b.dataset.rmGrade}`).catch(()=>{});
+      await sbSend("DELETE",`grades_horarios?id=eq.${b.dataset.rmGrade}`);
+      renderStaff();
+    }catch(e){
+      console.error("[FitBase] Falha ao remover aula:",e.status,e.body);
+      erroInline("l-err","Não foi possível remover a aula.");b.disabled=false;
+    }
+  }));
+
+  const fc=document.getElementById("f-conta");
+  if(fc) fc.addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const err=document.getElementById("ct-err"), ok=document.getElementById("ct-ok"), btn=document.getElementById("ct-btn");
+    err.classList.remove("show"); ok.style.display="none";
+    const nome=document.getElementById("ct-nome").value.trim();
+    const email=document.getElementById("ct-email").value.trim();
+    const senha=document.getElementById("ct-senha").value;
+    if(senha.length<8){err.textContent="A senha precisa ter pelo menos 8 caracteres.";err.classList.add("show");return;}
+    btn.disabled=true;btn.textContent="Criando…";
+    try{
+      const r=await fetch(`${SUPABASE_URL}/functions/v1/criar-aluno`,{method:"POST",
+        headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${S.sessao.token}`,"Content-Type":"application/json"},
+        body:JSON.stringify({nome,email,senha})});
+      const data=await r.json().catch(()=>null);
+      if(!r.ok){err.textContent=data?.error||"Não foi possível criar a conta. Tente novamente.";err.classList.add("show");
+        btn.disabled=false;btn.textContent="Criar conta";return;}
+      ok.textContent=`Conta de ${data.nome} criada! Agora finalize a matrícula abaixo.`;ok.style.display="block";
+      fc.reset();btn.disabled=false;btn.textContent="Criar conta";
+      setTimeout(()=>renderStaff(),1200);   // recarrega para o novo perfil aparecer na matrícula
+    }catch(_){err.textContent="Sem conexão com o servidor. Verifique a internet e tente de novo.";
+      err.classList.add("show");btn.disabled=false;btn.textContent="Criar conta";}
+  });
+
+  const f=document.getElementById("f-novo");
+  if(f) f.addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const profileId=document.getElementById("n-perfil").value;
+    /* academia do próprio staff logado ou, em último caso, do perfil do aluno */
+    const academiaId=S.perfil.academia_id
+      || semMatricula.find(p=>p.id===profileId)?.academia_id
+      || null;
+    if(!academiaId){
+      console.error("[FitBase] INSERT em alunos abortado: academia_id indefinido. Perfil logado:",S.perfil);
+      erroInline("n-err","Não foi possível identificar a academia deste cadastro. Verifique o academia_id do seu perfil.");
+      return;
+    }
+    /* payload: nomes de colunas conferidos com a tabela `alunos`
+       (mesmos campos lidos no SELECT acima: profile_id, academia_id,
+        matricula, plano, status, telefone) */
+    const payload={profile_id:profileId,
+      academia_id:academiaId,
+      matricula:document.getElementById("n-mat").value.trim(),
+      plano:document.getElementById("n-plano").value.trim()||null,
+      telefone:document.getElementById("n-tel").value.trim()||null};
+    try{
+      await sbSend("POST","alunos",payload);
+      renderStaff();
+    }catch(e){
+      /* diagnóstico completo no F12: status HTTP + resposta do Supabase
+         (message/details/hint apontam a coluna ou a policy RLS que rejeitou) */
+      console.error("[FitBase] Falha ao matricular aluno.",
+        "\n→ Status HTTP:",e.status,
+        "\n→ Resposta do Supabase:",e.body,
+        "\n→ Payload enviado:",payload,
+        "\n→ Erro bruto:",e);
+      erroInline("n-err", e.status===409?"Essa matrícula já existe nesta academia."
+        :e.status===403?"A regra de segurança (RLS) bloqueou o cadastro — veja o detalhe no console (F12)."
+        :"Não foi possível matricular. Confira os dados (detalhes no console F12).");
+    }
+  });
+  document.querySelectorAll("[data-salvar]").forEach(b=>b.addEventListener("click", async ()=>{
+    b.disabled=true;
+    try{
+      await sbSend("PATCH",`alunos?id=eq.${b.dataset.salvar}`,{
+        plano:document.querySelector(`[data-plano="${b.dataset.salvar}"]`).value.trim()||null,
+        status:document.querySelector(`[data-status="${b.dataset.salvar}"]`).value});
+      renderStaff();
+    }catch(_){erroInline("l-err","Não foi possível salvar as alterações.");b.disabled=false;}
+  }));
+  document.querySelectorAll("[data-excluir]").forEach(b=>b.addEventListener("click", async ()=>{
+    if(!confirm("Excluir esta matrícula? Treinos e históricos do aluno serão removidos."))return;
+    b.disabled=true;
+    try{await sbSend("DELETE",`alunos?id=eq.${b.dataset.excluir}`);renderStaff();}
+    catch(_){erroInline("l-err","Não foi possível excluir.");b.disabled=false;}
+  }));
+}
+
+/* Gerente: gestao de funcionarios (RLS etapa 3: edita/exclui recep/prof/aluno,
+   troca role apenas entre os 3 operacionais; contas novas = administracao) */
+async function painelGerente(){
+  const equipe=await sbGet(`profiles?select=id,nome,role&order=role,nome`);
+  const editaveis=["recepcionista","professor","aluno"];
+  shell(ROLES.gerente.painel, `
+  <div class="cartao"><h2>Equipe e alunos <small>${equipe.length} pessoa(s)</small></h2>
+    <ul class="lista">${equipe.map(p=>{
+      const podeEditar=editaveis.includes(p.role);
+      return `<li>
+        <span>${podeEditar?`<input class="inline-mini" style="max-width:170px" value="${esc(p.nome)}" data-nome="${p.id}">`
+          :`<strong>${esc(p.nome)}</strong>${p.id===S.perfil.id?` <span class="sub">(você)</span>`:""}`}</span>
+        <span class="acoes">
+          ${podeEditar?`
+            <select class="inline-mini" data-role="${p.id}">
+              ${editaveis.map(r=>`<option value="${r}" ${p.role===r?"selected":""}>${ROLES[r].cargo}</option>`).join("")}</select>
+            <button class="btn-mini" data-salvar="${p.id}">Salvar</button>
+            <button class="btn-mini perigo" data-excluir="${p.id}">Excluir</button>`
+          :`<span class="chip" style="color:var(--r-${p.role},var(--green));background:var(--r-${p.role}-soft,var(--green-soft))">${esc(ROLES[p.role]?.cargo||p.role)}</span>`}
+        </span></li>`;}).join("")}</ul>
+    <div class="form-error" id="g-err"></div>
+  </div>
+  <div class="vazio"><div class="ring"></div>Criar novas contas exige a administração (chave de serviço) — os cargos gerente e super admin não são editáveis por aqui, por regra de segurança.</div>`);
+
+  document.querySelectorAll("[data-salvar]").forEach(b=>b.addEventListener("click", async ()=>{
+    b.disabled=true;
+    try{
+      await sbSend("PATCH",`profiles?id=eq.${b.dataset.salvar}`,{
+        nome:document.querySelector(`[data-nome="${b.dataset.salvar}"]`).value.trim(),
+        role:document.querySelector(`[data-role="${b.dataset.salvar}"]`).value});
+      renderStaff();
+    }catch(_){erroInline("g-err","Não foi possível salvar — a regra de segurança pode ter bloqueado a alteração.");b.disabled=false;}
+  }));
+  document.querySelectorAll("[data-excluir]").forEach(b=>b.addEventListener("click", async ()=>{
+    if(!confirm("Excluir este perfil da academia?"))return;
+    b.disabled=true;
+    try{await sbSend("DELETE",`profiles?id=eq.${b.dataset.excluir}`);renderStaff();}
+    catch(_){erroInline("g-err","Não foi possível excluir.");b.disabled=false;}
+  }));
+}
+
+/* Professor: montagem de fichas (treinos + treino_exercicios, RLS etapas 5-6) */
+async function painelProfessor(){
+  const [treinos,fichas,alunos]=await Promise.all([
+    sbGet(`treinos?select=id,nome_treino,aluno_id,alunos(matricula,profiles(nome))&order=criado_em.desc`),
+    sbGet(`treino_exercicios?select=id,treino_id,series,repeticoes,carga,descanso,exercicios(nome)`),
+    sbGet(`alunos?select=id,matricula,profiles(nome)&order=matricula`)
+  ]);
+  await carregarCatalogo();
+
+  shell(ROLES.professor.painel, `
+  <div class="cartao"><h2>Novo treino</h2>
+    ${alunos.length?`
+    <form id="f-treino"><div class="form-linha">
+      <div class="field"><label>Aluno</label>
+        <select id="t-aluno">${alunos.map(a=>`<option value="${a.id}">${esc(a.profiles?.nome||"—")} (${esc(a.matricula||"—")})</option>`).join("")}</select></div>
+      <div class="field"><label>Nome do treino</label><input id="t-nome" placeholder="Treino B - Costas" required></div>
+    </div>
+    <div class="form-error" id="t-err"></div>
+    <button class="btn" type="submit">Criar treino</button></form>`
+    :`<div class="vazio">Nenhum aluno matriculado ainda — peça à recepção.</div>`}
+  </div>
+  ${treinos.length?treinos.map(t=>{
+    const itens=fichas.filter(f=>f.treino_id===t.id);
+    return `<div class="cartao">
+      <h2>${esc(t.nome_treino)} <small>${esc(t.alunos?.profiles?.nome||"—")} · ${esc(t.alunos?.matricula||"—")}</small></h2>
+      ${itens.length?`<ul class="lista">${itens.map(i=>`
+        <li><span>${esc(i.exercicios?.nome||"?")}<span class="sub"> · ${i.series??"—"}×${i.repeticoes??"—"}${i.carga?` · ${esc(i.carga)}`:""}${i.descanso?` · ⏱ ${esc(i.descanso)}`:""}</span></span>
+        <button class="btn-mini perigo" data-rm-item="${i.id}">Remover</button></li>`).join("")}</ul>`
+        :`<p class="sub">Ficha vazia — adicione o primeiro exercício abaixo.</p>`}
+      <form data-add="${t.id}" style="margin-top:.7rem"><div class="form-linha">
+        <div class="field busca-ex"><label>Exercício</label>
+          <input data-campo="ex" placeholder="Buscar no catálogo…" autocomplete="off" required>
+          <button type="button" class="seta-ex" aria-label="Ver todos os exercícios" title="Ver catálogo completo">▾</button>
+          <div class="sugestoes"></div></div>
+        <div class="field"><label>Séries</label><input type="number" min="1" data-campo="series" inputmode="numeric"></div>
+        <div class="field"><label>Reps</label><input type="number" min="1" data-campo="reps" inputmode="numeric"></div>
+        <div class="field"><label>Carga</label><input data-campo="carga" placeholder="40kg"></div>
+        <div class="field"><label>Descanso</label><input data-campo="descanso" placeholder="90s"></div>
+      </div>
+      <div class="acoes"><button class="btn-mini" type="submit">Adicionar à ficha</button>
+        <button class="btn-mini perigo" type="button" data-rm-treino="${t.id}">Excluir treino</button></div>
+      <div class="form-error" data-err="${t.id}"></div></form>
+    </div>`;}).join("")
+    :`<div class="vazio"><div class="ring"></div><strong>Nenhum treino prescrito ainda.</strong><br>Crie o primeiro acima.</div>`}
+  ${S.catalogo.length?"":`<div class="vazio">O catálogo de exercícios ainda está vazio — rode o script de upload dos GIFs para liberar a busca.</div>`}`);
+
+  const ft=document.getElementById("f-treino");
+  if(ft) ft.addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    try{
+      await sbSend("POST","treinos",{academia_id:S.perfil.academia_id,
+        aluno_id:document.getElementById("t-aluno").value,
+        professor_id:S.perfil.id,
+        nome_treino:document.getElementById("t-nome").value.trim()});
+      renderStaff();
+    }catch(_){erroInline("t-err","Não foi possível criar o treino.");}
+  });
+  document.querySelectorAll("form[data-add]").forEach(ligarBuscaExercicio);
+  document.querySelectorAll("form[data-add]").forEach(f=>f.addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const campo=n=>f.querySelector(`[data-campo="${n}"]`).value.trim();
+    const ex=buscarExercicio(campo("ex")); // ignora caixa, acentos e "(1)" final
+    const errId=f.querySelector("[data-err]");
+    errId.classList.remove("show");
+    if(!ex){errId.textContent="Escolha um exercício do catálogo.";errId.classList.add("show");return;}
+    try{
+      await sbSend("POST","treino_exercicios",{treino_id:f.dataset.add,exercicio_id:ex.id,
+        series:+campo("series")||null,repeticoes:+campo("reps")||null,
+        carga:campo("carga")||null,descanso:campo("descanso")||null});
+      renderStaff();
+    }catch(_){errId.textContent="Não foi possível adicionar.";errId.classList.add("show");}
+  }));
+  document.querySelectorAll("[data-rm-item]").forEach(b=>b.addEventListener("click", async ()=>{
+    b.disabled=true;
+    try{await sbSend("DELETE",`treino_exercicios?id=eq.${b.dataset.rmItem}`);renderStaff();}catch(_){b.disabled=false;}
+  }));
+  document.querySelectorAll("[data-rm-treino]").forEach(b=>b.addEventListener("click", async ()=>{
+    if(!confirm("Excluir este treino e toda a ficha?"))return;
+    b.disabled=true;
+    try{await sbSend("DELETE",`treinos?id=eq.${b.dataset.rmTreino}`);renderStaff();}catch(_){b.disabled=false;}
+  }));
+}
+
+/* ============================================================
+   SUPER ADMIN — gestão comercial das academias
+   (criar, ativar/suspender, ajustar validade do plano, excluir)
+============================================================ */
+
+/* Exclusão em cascata manual: apaga primeiro as tabelas "filhas"
+   (que apontam para treinos/alunos/grades) e só então as "pais",
+   evitando erros de integridade de chave estrangeira no Postgres. */
+async function excluirAcademiaCascata(id){
+  const [alunos,treinos,grades]=await Promise.all([
+    sbGet(`alunos?academia_id=eq.${id}&select=id`),
+    sbGet(`treinos?academia_id=eq.${id}&select=id`),
+    sbGet(`grades_horarios?academia_id=eq.${id}&select=id`)
+  ]);
+  const ids=l=>l.map(x=>x.id).join(",");
+  /* 1) netos: itens de ficha, históricos, recordes e reservas */
+  if(treinos.length) await sbSend("DELETE",`treino_exercicios?treino_id=in.(${ids(treinos)})`);
+  if(alunos.length){
+    await sbSend("DELETE",`historico_treinos?aluno_id=in.(${ids(alunos)})`);
+    await sbSend("DELETE",`historico_cardio?aluno_id=in.(${ids(alunos)})`);
+    await sbSend("DELETE",`recordes_pessoais?aluno_id=in.(${ids(alunos)})`);
+    await sbSend("DELETE",`reservas_horarios?aluno_id=in.(${ids(alunos)})`);
+  }
+  if(grades.length) await sbSend("DELETE",`reservas_horarios?grade_id=in.(${ids(grades)})`);
+  /* 2) filhos diretos da academia */
+  await sbSend("DELETE",`treinos?academia_id=eq.${id}`);
+  await sbSend("DELETE",`grades_horarios?academia_id=eq.${id}`);
+  await sbSend("DELETE",`alunos?academia_id=eq.${id}`);
+  await sbSend("DELETE",`profiles?academia_id=eq.${id}`);
+  /* 3) por fim, a própria academia */
+  await sbSend("DELETE",`academias?id=eq.${id}`);
+}
+
+async function renderSuperAdmin(){
+  renderLoading("Carregando supervisão…");
+  let academias=[],perfis=[];
+  try{[academias,perfis]=await Promise.all([
+      sbGet(`academias?select=id,nome,ativa,plano_ate,criada_em&order=criada_em`),
+      sbGet(`profiles?select=academia_id`)]);}catch(_){}
+  const hoje=hojeISO();
+  shell(`${ROLES.super_admin.painel} · ${academias.length} academia(s)`, `
+  <div class="cartao"><h2>Criar nova academia</h2>
+    <form id="f-academia"><div class="form-linha">
+      <div class="field"><label for="ac-nome">Nome</label>
+        <input id="ac-nome" placeholder="Academia Litoral" required></div>
+      <div class="field"><label for="ac-plano">Plano válido até</label>
+        <input id="ac-plano" type="date" required></div>
+    </div>
+    <div class="form-error" id="ac-err" role="alert"></div>
+    <button class="btn" type="submit">Criar academia</button></form>
+  </div>
+  <div class="cartao"><h2>Criar conta de funcionário</h2>
+    <p class="sub" style="margin:-.3rem 0 .8rem">Cria o login do gerente, recepcionista ou professor de uma academia — o primeiro time de cada cliente novo.</p>
+    ${academias.length?`
+    <form id="f-staff">
+      <div class="form-linha">
+        <div class="field"><label for="st-academia">Academia</label>
+          <select id="st-academia">${academias.map(a=>`<option value="${a.id}">${esc(a.nome)}</option>`).join("")}</select></div>
+        <div class="field"><label for="st-role">Cargo</label>
+          <select id="st-role">
+            <option value="gerente">Gerente</option>
+            <option value="recepcionista">Recepcionista</option>
+            <option value="professor">Professor</option>
+          </select></div>
+      </div>
+      <div class="form-linha">
+        <div class="field"><label for="st-nome">Nome completo</label><input id="st-nome" autocomplete="off" placeholder="Carlos Souza" required></div>
+        <div class="field"><label for="st-email">E-mail</label><input id="st-email" type="email" autocomplete="off" inputmode="email" placeholder="carlos@academia.com" required></div>
+        <div class="field"><label for="st-senha">Senha inicial</label><input id="st-senha" autocomplete="off" placeholder="mín. 8 caracteres" required></div>
+      </div>
+      <div class="form-error" id="st-err" role="alert"></div>
+      <div class="aviso-ok" id="st-ok" style="display:none"></div>
+      <button class="btn" type="submit" id="st-btn">Criar conta de funcionário</button>
+    </form>`
+    :`<div class="vazio">Crie uma academia primeiro para poder cadastrar a equipe dela.</div>`}
+  </div>
+  <div class="cartao"><h2>Academias <small>${academias.length} registro(s)</small></h2>
+    ${academias.length?`<ul class="lista">${academias.map(a=>{
+      const suspensa=!a.ativa||(a.plano_ate&&a.plano_ate<hoje);
+      const usuarios=perfis.filter(p=>p.academia_id===a.id).length;
+      return `<li>
+        <span><strong>${esc(a.nome)}</strong><span class="sub"> · ${usuarios} usuário(s)</span><br>
+          <span class="badge ${suspensa?"off":"ok"}">${suspensa?"Suspensa":"Ativa"}</span></span>
+        <span class="acoes">
+          <input class="inline-mini" type="date" value="${esc((a.plano_ate||"").slice(0,10))}"
+            data-plano-ate="${a.id}" aria-label="Plano válido até — ${esc(a.nome)}">
+          <button class="btn-mini" data-salvar-plano="${a.id}">Salvar data</button>
+          <button class="btn-mini" data-toggle="${a.id}" data-ativa="${a.ativa?"1":""}">
+            ${a.ativa?"Suspender":"Ativar"}</button>
+          <button class="btn-mini perigo" data-excluir-ac="${a.id}" data-nome="${esc(a.nome)}">Excluir</button>
+        </span></li>`;}).join("")}</ul>`
+      :`<div class="vazio"><div class="ring"></div><strong>Nenhuma academia cadastrada.</strong><br>Crie a primeira no formulário acima.</div>`}
+    <div class="form-error" id="ls-err" role="alert"></div>
+  </div>`);
+
+  /* criar academia */
+  document.getElementById("f-academia").addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const err=document.getElementById("ac-err"); err.classList.remove("show");
+    const nome=document.getElementById("ac-nome").value.trim();
+    const planoAte=document.getElementById("ac-plano").value;
+    if(!nome||!planoAte){err.textContent="Informe o nome e a validade do plano.";err.classList.add("show");return;}
+    try{
+      await sbSend("POST","academias",{nome,ativa:true,plano_ate:planoAte});
+      renderSuperAdmin();
+    }catch(e){
+      console.error("[FitBase] Falha ao criar academia:",e.status,e.body);
+      err.textContent="Não foi possível criar a academia — a regra de segurança (RLS) pode ter bloqueado. Detalhes no console (F12).";
+      err.classList.add("show");
+    }
+  });
+  /* criar conta de funcionário (gerente/recepção/professor) via Edge Function */
+  const fs=document.getElementById("f-staff");
+  if(fs) fs.addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const err=document.getElementById("st-err"), ok=document.getElementById("st-ok"), btn=document.getElementById("st-btn");
+    err.classList.remove("show"); ok.style.display="none";
+    const corpo={nome:document.getElementById("st-nome").value.trim(),
+      email:document.getElementById("st-email").value.trim(),
+      senha:document.getElementById("st-senha").value,
+      role:document.getElementById("st-role").value,
+      academia_id:document.getElementById("st-academia").value};
+    if(corpo.senha.length<8){err.textContent="A senha precisa ter pelo menos 8 caracteres.";err.classList.add("show");return;}
+    btn.disabled=true;btn.textContent="Criando…";
+    try{
+      const r=await fetch(`${SUPABASE_URL}/functions/v1/criar-staff`,{method:"POST",
+        headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${S.sessao.token}`,"Content-Type":"application/json"},
+        body:JSON.stringify(corpo)});
+      const data=await r.json().catch(()=>null);
+      if(!r.ok){err.textContent=data?.error||"Não foi possível criar a conta. Tente novamente.";err.classList.add("show");
+        btn.disabled=false;btn.textContent="Criar conta de funcionário";return;}
+      ok.textContent=`Conta de ${data.nome} (${ROLES[data.role]?.cargo||data.role}) criada! Já pode entrar no app.`;ok.style.display="block";
+      fs.reset();btn.disabled=false;btn.textContent="Criar conta de funcionário";
+    }catch(_){err.textContent="Sem conexão com o servidor. Verifique a internet e tente de novo.";
+      err.classList.add("show");btn.disabled=false;btn.textContent="Criar conta de funcionário";}
+  });
+  /* salvar validade do plano */
+  document.querySelectorAll("[data-salvar-plano]").forEach(b=>b.addEventListener("click", async ()=>{
+    const id=b.dataset.salvarPlano;
+    const valor=document.querySelector(`[data-plano-ate="${id}"]`).value;
+    if(!valor){erroInline("ls-err","Escolha uma data válida antes de salvar.");return;}
+    b.disabled=true;
+    try{await sbSend("PATCH",`academias?id=eq.${id}`,{plano_ate:valor});renderSuperAdmin();}
+    catch(e){console.error("[FitBase] Falha ao atualizar plano_ate:",e.status,e.body);
+      erroInline("ls-err","Não foi possível atualizar a validade do plano.");b.disabled=false;}
+  }));
+  /* alternar Ativa / Suspensa */
+  document.querySelectorAll("[data-toggle]").forEach(b=>b.addEventListener("click", async ()=>{
+    b.disabled=true;
+    try{await sbSend("PATCH",`academias?id=eq.${b.dataset.toggle}`,{ativa:!b.dataset.ativa});renderSuperAdmin();}
+    catch(e){console.error("[FitBase] Falha ao alterar status:",e.status,e.body);
+      erroInline("ls-err","Não foi possível alterar o status da academia.");b.disabled=false;}
+  }));
+  /* excluir academia + dados vinculados */
+  document.querySelectorAll("[data-excluir-ac]").forEach(b=>b.addEventListener("click", async ()=>{
+    if(!confirm(`Excluir "${b.dataset.nome}"?\n\nIsso apaga TODOS os dados vinculados: perfis, alunos, treinos, históricos, recordes, grades e reservas. Essa ação não pode ser desfeita.`))return;
+    b.disabled=true;b.textContent="Excluindo…";
+    try{await excluirAcademiaCascata(b.dataset.excluirAc);renderSuperAdmin();}
+    catch(e){console.error("[FitBase] Falha na exclusão em cascata:",e.status,e.body);
+      erroInline("ls-err","Não foi possível concluir a exclusão — parte dos dados pode ter sido removida. Detalhes no console (F12).");
+      b.disabled=false;b.textContent="Excluir";}
+  }));
+}
+
+retomarSessao();
+</script>
+</body>
+</html>
